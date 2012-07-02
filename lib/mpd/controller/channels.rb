@@ -50,10 +50,12 @@ class Channels
 		@channels   = []
 	end
 
-	def each_name
-		controller.command(:channels).each {|_, name|
-			yield name
-		}
+	def names
+		controller.command(:channels).map(&:last)
+	end
+
+	def each_name (&block)
+		names.each(&block)
 	end
 
 	def each
@@ -62,12 +64,12 @@ class Channels
 		}
 	end
 
-	def [] (name)
-		@channels << WeakRef.new(Channel.new(self, name))
-	end
+	def [] (name, sub = true)
+		subscribe name if sub
 
-	def subscribed? (name)
-		each_name.include?(name)
+		Channel.new(self, name).tap {|channel|
+			@channels << WeakRef.new(channel)
+		}
 	end
 
 	def subscribe (name)
@@ -98,7 +100,7 @@ private
 
 		response.each_slice(2) {|(_, name), (_, message)|
 			@channels.each {|channel|
-				next unless channel.name == name
+				next unless channel.name.to_s == name.to_s
 
 				channel.incoming(message)
 			}

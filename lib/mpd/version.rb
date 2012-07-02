@@ -10,6 +10,6 @@
 
 module MPD
 	def self.version
-		'0.16.8'
+		'0.17.0'
 	end
 end

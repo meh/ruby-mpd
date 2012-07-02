@@ -78,6 +78,10 @@ class Response
 		self
 	end
 
+	def empty?
+		to_a.empty?
+	end
+
 	def to_a
 		@internal
 	end
