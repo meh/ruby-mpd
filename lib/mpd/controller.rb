@@ -15,6 +15,8 @@ require 'mpd/protocol'
 require 'mpd/controller/commands'
 require 'mpd/controller/toggle'
 require 'mpd/controller/player'
+require 'mpd/controller/status'
+require 'mpd/controller/channels'
 
 module MPD
 
@@ -69,11 +71,35 @@ class Controller
 	end
 
 	def toggle
-		Toggle.new(self)
+		@toggle ||= Toggle.new(self)
 	end
 
 	def player
-		Player.new(self)
+		@player ||= Player.new(self)
+	end
+
+	def status
+		Status.new(self)
+	end
+
+	def channels
+		@channels ||= Channels.new(self)
+	end
+
+	def channel (name)
+		channels[name]
+	end
+
+	def wait
+		command :idle
+	end
+
+	def wait_for (*args)
+		command :idle, *args.flatten.compact.uniq
+	end
+
+	def stop_waiting
+		command :noidle
 	end
 end
 
