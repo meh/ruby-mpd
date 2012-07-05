@@ -14,27 +14,58 @@ module MPD; class Controller
 
 class Status
 	class Song
-		attr_reader :controller, :tags
+		attr_reader   :controller, :tags
+		attr_accessor :file, :position, :duration
 
 		def initialize (controller)
 			@controller = controller
 			@tags       = OpenStruct.new
 		end
+
+		%w[track title artist album genre].each {|name|
+			define_method name do
+				tags.__send__ name
+			end
+		}
 	end
 
-	attr_reader :controller, :settings
+	class Mixer
+		attr_reader   :controller
+		attr_accessor :db, :delay
+
+		def initialize (controller)
+			@controller = controller
+		end
+	end
+
+	attr_reader :controller, :song, :mixer, :volume, :crossfade
 
 	def initialize (controller)
 		@controller = controller
 
-		@song     = Song.new(controller)
-		@settings = OpenStruct.new
+		@song  = Song.new(controller)
+		@mixer = Mixer.new(controller)
 
 		controller.command(:status).each {|name, value|
 			case name
-			when :state
-				@status = value
+			when :state        then @status      = value
+			when :volume       then @volume      = value
+			when :xfade        then @crossfade   = value
+			when :mixrampdb    then @mixer.db    = value
+			when :mixrampdelay then @mixer.delay = value
+			end
+		}
 
+		controller.command(:currentsong).each {|name, value|
+			case name
+			when :file   then song.file        = value
+			when :Pos    then song.position    = value
+			when :Time   then song.duration    = value
+			when :Track  then song.tags.track  = value
+			when :Title  then song.tags.title  = value
+			when :Artist then song.tags.artist = value
+			when :Album  then song.tags.album  = value
+			when :Genre  then song.tags.genre  = value
 			end
 		}
 	end

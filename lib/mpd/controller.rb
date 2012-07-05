@@ -91,11 +91,15 @@ class Controller
 	end
 
 	def wait
-		command :idle
+		command(:idle).first.last.to_sym
+	rescue Interrupt
+		stop_waiting and raise # my undead army
 	end
 
 	def wait_for (*args)
-		command :idle, *args.flatten.compact.uniq
+		command(:idle, *args.flatten.compact.uniq).first.last.to_sym
+	rescue Interrupt
+		stop_waiting and raise # my undead army
 	end
 
 	def stop_waiting

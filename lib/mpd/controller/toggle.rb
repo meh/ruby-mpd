@@ -38,7 +38,7 @@ class Toggle
 	end
 
 	def on? (name)
-		result = controller.command(:status).to_hash[name]
+		result = controller.command(:status).to_hash[name.to_sym]
 
 		return false if result != true && result != false
 
@@ -51,17 +51,22 @@ class Toggle
 		end
 
 		define_method "#{name}!" do
-			on option_name
+			on name
 		end
 
 		define_method "no_#{name}!" do
-			off option_name
+			off name
 		end
 
 		define_method "#{name}?" do
-			on? option_name
+			on? name
 		end
 	}
+
+	alias shuffle     random
+	alias shuffle!    random!
+	alias no_shuffle! no_random!
+	alias shuffle?    random?
 end
 
 end; end

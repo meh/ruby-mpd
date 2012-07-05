@@ -17,7 +17,8 @@ class Response
 		def initialize (name, value)
 			@name  = name
 			@value = case name
-			when :artists, :albums, :songs, :uptime, :playtime, :db_playtime, :volume, :playlist, :playlistlength, :xfade
+			when :song, :artists, :albums, :songs, :uptime, :playtime, :db_playtime, :volume,
+			     :playlist, :playlistlength, :xfade, :Time, :Pos, :Id, :Date, :Track
 				value.to_i
 
 			when :mixrampdb, :mixrampdelay

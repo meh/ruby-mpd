@@ -96,15 +96,15 @@ private
 			end
 		end
 
-		@channels.select!(&:weakref_alive?)
-
 		response.each_slice(2) {|(_, name), (_, message)|
 			@channels.each {|channel|
-				next unless channel.name.to_s == name.to_s
+				next unless channel.weakref_alive? && channel.name.to_s == name.to_s
 
 				channel.incoming(message)
 			}
 		}
+
+		@channels.select!(&:weakref_alive?)
 
 		true
 	end
