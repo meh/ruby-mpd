@@ -51,7 +51,7 @@ class Channels
 	end
 
 	def names
-		controller.command(:channels).map(&:last)
+		controller.do(:channels).map(&:last)
 	end
 
 	def each_name (&block)
@@ -73,20 +73,20 @@ class Channels
 	end
 
 	def subscribe (name)
-		controller.command :subscribe, name
+		controller.do :subscribe, name
 	end
 
 	def unsubscribe (name)
-		controller.command :unsubscribe, name
+		controller.do :unsubscribe, name
 	end
 
 	def send_message (name, text)
-		controller.command :sendmessage, name, text
+		controller.do :sendmessage, name, text
 	end
 
 private
 	def read_messages (wait = false)
-		response = controller.command(:readmessages)
+		response = controller.do(:readmessages)
 
 		if response.empty?
 			if wait

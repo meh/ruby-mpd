@@ -12,7 +12,9 @@ require 'socket'
 
 require 'mpd/protocol'
 
-require 'mpd/controller/commands'
+require 'mpd/controller/do'
+require 'mpd/controller/stats'
+require 'mpd/controller/audio'
 require 'mpd/controller/toggle'
 require 'mpd/controller/player'
 require 'mpd/controller/status'
@@ -58,16 +60,41 @@ class Controller
 		super
 	end
 
-	def commands (&block)
-		Commands.new(self, &block).send
+	def do (*args, &block)
+		if block
+			Do.new(self, &block).send
+		else
+			name    = args.shift
+			command = Protocol::Command.new(name, args)
+
+			@socket.puts command.to_s
+
+			Protocol::Response.read(self, command)
+		end
 	end
 
-	def command (name, *args)
-		command = Protocol::Command.new(name, args)
+	def authenticate (password)
+		self.do :password, password
 
-		@socket.puts command.to_s
+		self
+	end
 
-		Protocol::Response.read(self, command)
+	def kill!
+		self.do :kill
+	end
+
+	def active?
+		self.do(:ping).success?
+	rescue
+		false
+	end
+
+	def stats
+		Stats.new(self)
+	end
+
+	def audio
+		@audio ||= Audio.new(self)
 	end
 
 	def toggle
@@ -76,6 +103,10 @@ class Controller
 
 	def player
 		@player ||= Player.new(self)
+	end
+
+	def playlist
+		@playlist ||= Playlist.new(self)
 	end
 
 	def status
@@ -91,19 +122,19 @@ class Controller
 	end
 
 	def wait
-		command(:idle).first.last.to_sym
+		self.do(:idle).map(&:last)
 	rescue Interrupt
 		stop_waiting and raise # my undead army
 	end
 
 	def wait_for (*args)
-		command(:idle, *args.flatten.compact.uniq).first.last.to_sym
+		self.do(:idle, *args.flatten.compact.uniq).map(&:last)
 	rescue Interrupt
 		stop_waiting and raise # my undead army
 	end
 
 	def stop_waiting
-		command :noidle
+		self.do :noidle
 	end
 end
 

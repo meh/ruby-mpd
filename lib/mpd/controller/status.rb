@@ -31,7 +31,7 @@ class Status
 
 	class Mixer
 		attr_reader   :controller
-		attr_accessor :db, :delay
+		attr_accessor :decibels, :delay
 
 		def initialize (controller)
 			@controller = controller
@@ -46,17 +46,17 @@ class Status
 		@song  = Song.new(controller)
 		@mixer = Mixer.new(controller)
 
-		controller.command(:status).each {|name, value|
+		controller.do(:status).each {|name, value|
 			case name
-			when :state        then @status      = value
-			when :volume       then @volume      = value
-			when :xfade        then @crossfade   = value
-			when :mixrampdb    then @mixer.db    = value
-			when :mixrampdelay then @mixer.delay = value
+			when :state        then @status         = value
+			when :volume       then @volume         = value
+			when :xfade        then @crossfade      = value
+			when :mixrampdb    then @mixer.decibles = value
+			when :mixrampdelay then @mixer.delay    = value
 			end
 		}
 
-		controller.command(:currentsong).each {|name, value|
+		controller.do(:currentsong).each {|name, value|
 			case name
 			when :file   then song.file        = value
 			when :Pos    then song.position    = value

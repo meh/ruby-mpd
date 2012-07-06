@@ -17,56 +17,90 @@ class Player
 		@controller = controller
 	end
 
-	def play (what = nil)
-		if what.nil?
-			unpause
-		elsif what.is_a? Integer
-			controller.command :play, what
+	def play (what = {})
+		if what[:position]
+			controller.do :play, what[:position]
+		elsif what[:id]
+			controller.do :playid, what[:id]
 		else
-			controller.command :play, what.to_sym
+			controller.do :play, what.to_sym
 		end
 
 		self
 	end
 
 	def pause
-		controller.command :pause, true
+		controller.do :pause, true
 
 		self
 	end
 
 	def unpause
-		controller.command :pause, false
+		controller.do :pause, false
 
 		self
 	end
 
 	def stop
-		controller.command :stop
+		controller.do :stop
 
 		self
 	end
 
 	def next
-		controller.command :next
+		controller.do :next
 
 		self
 	end
 
 	def prev
-		controller.command :previous
+		controller.do :previous
 
 		self
 	end
 
 	def volume (volume)
-		controller.command :setvol, volume
+		controller.do :setvol, volume
 
 		self
 	end
 
-	def seek (second)
-		controller.command :seekcur, second
+	def crossfade (seconds)
+		controller.do :crossfade, seconds
+
+		self
+	end
+
+	def mixer (options)
+		if options[:decibels]
+			controller.do :mixrampdb, options[:decibels]
+		end
+
+		if options[:delay]
+			controller.do :mixrampdelay, options[:delay]
+		end
+
+		self
+	end
+
+	def replay_gain (mode = nil)
+		if mode
+			controller.do :replay_gain_mode, mode
+
+			self
+		else
+			controller.do(:replay_gain_status).first.last
+		end
+	end
+
+	def seek (second, optional = {})
+		if optional[:position]
+			controller.do :seek, optional[:position], second
+		elsif optional[:id]
+			controller.do :seekid, optional[:id], second
+		else
+			controller.do :seekcur, second
+		end
 
 		self
 	end

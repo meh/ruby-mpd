@@ -10,7 +10,7 @@
 
 module MPD; class Controller
 
-class Commands < BasicObject
+class Do < BasicObject
 	attr_reader :controller
 
 	def initialize (controller, &block)
@@ -25,9 +25,9 @@ class Commands < BasicObject
 	end
 
 	def send
-		controller.puts ::MPD::Protocol::CommandList.new(@commands).to_s
-
 		result = []
+
+		controller.puts ::MPD::Protocol::CommandList.new(@commands).to_s
 
 		@commands.each {|command|
 			result << ::MPD::Protocol::Response.read(controller, command)

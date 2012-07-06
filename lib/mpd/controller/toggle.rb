@@ -18,12 +18,12 @@ class Toggle
 	end
 
 	def toggle (name)
-		controller.command(name, !on?(name))
+		controller.do(name, !on?(name))
 	end
 
 	def on (name)
 		unless on? name
-			controller.command(name, true)
+			controller.do(name, true)
 		end
 
 		self
@@ -31,14 +31,14 @@ class Toggle
 
 	def off (name)
 		if on? name
-			controller.command(name, false)
+			controller.do(name, false)
 		end
 
 		self
 	end
 
 	def on? (name)
-		result = controller.command(:status).to_hash[name.to_sym]
+		result = controller.do(:status).to_hash[name.to_sym]
 
 		return false if result != true && result != false
 

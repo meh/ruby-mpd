@@ -18,19 +18,19 @@ class Response
 			@name  = name
 			@value = case name
 			when :song, :artists, :albums, :songs, :uptime, :playtime, :db_playtime, :volume,
-			     :playlist, :playlistlength, :xfade, :Time, :Pos, :Id, :Date, :Track
+			     :playlist, :playlistlength, :xfade, :Time, :Pos, :Id, :Date, :Track, :outputid
 				value.to_i
 
 			when :mixrampdb, :mixrampdelay
 				value == 'nan' ? Float::NAN : value.to_f
 
-			when :repeat, :random, :single, :consume
+			when :repeat, :random, :single, :consume, :outputenabled
 				value != '0'
 
 			when :db_update
 				Time.at(value.to_i)
 
-			when :command, :state
+			when :command, :state, :changed, :replay_gain_mode
 				value.to_sym
 
 			else value
@@ -116,6 +116,8 @@ class Ok < Response
 
 		@message = message
 	end
+
+	def success?; true; end
 end
 
 class Error < Response
@@ -156,6 +158,8 @@ class Error < Response
 			raise ArgumentError, 'the Error code does not exist'
 		end
 	end
+
+	def success?; false; end
 
 	def to_sym
 		@code
