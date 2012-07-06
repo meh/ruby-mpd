@@ -38,11 +38,7 @@ class Toggle
 	end
 
 	def on? (name)
-		result = controller.do(:status).to_hash[name.to_sym]
-
-		return false if result != true && result != false
-
-		return result
+		controller.status.__send__ "#{name}?"
 	end
 
 	%w[pause random consume repeat single].each {|name|
@@ -62,6 +58,10 @@ class Toggle
 			on? name
 		end
 	}
+
+	def pause?
+		controller.status == :pause
+	end
 
 	alias shuffle     random
 	alias shuffle!    random!

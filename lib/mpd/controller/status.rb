@@ -8,67 +8,54 @@
 #  0. You just DO WHAT THE FUCK YOU WANT TO.
 #++
 
-require 'ostruct'
-
 module MPD; class Controller
 
 class Status
-	class Song
-		attr_reader   :controller, :tags
-		attr_accessor :file, :position, :duration
+	Mixer          = Struct.new(:decibels, :delay)
+	Playlist       = Struct.new(:version, :length, :current, :next)
+	Playlist::Song = Struct.new(:position, :id, :elapsed)
 
-		def initialize (controller)
-			@controller = controller
-			@tags       = OpenStruct.new
-		end
-
-		%w[track title artist album genre].each {|name|
-			define_method name do
-				tags.__send__ name
-			end
-		}
-	end
-
-	class Mixer
-		attr_reader   :controller
-		attr_accessor :decibels, :delay
-
-		def initialize (controller)
-			@controller = controller
-		end
-	end
-
-	attr_reader :controller, :song, :mixer, :volume, :crossfade
+	attr_reader :controller, :song, :mixer, :volume, :crossfade, :playlist, :bitrate, :error
 
 	def initialize (controller)
 		@controller = controller
 
-		@song  = Song.new(controller)
-		@mixer = Mixer.new(controller)
+		@mixer    = Mixer.new
+		@playlist = Playlist.new
 
 		controller.do(:status).each {|name, value|
 			case name
-			when :state        then @status         = value
-			when :volume       then @volume         = value
-			when :xfade        then @crossfade      = value
-			when :mixrampdb    then @mixer.decibles = value
-			when :mixrampdelay then @mixer.delay    = value
+			when :state          then @status           = value
+			when :repeat         then @repeat           = value
+			when :random         then @random           = value
+			when :single         then @single           = value
+			when :consume        then @consume          = value
+			when :volume         then @volume           = value
+			when :xfade          then @crossfade        = value
+			when :mixrampdb      then @mixer.decibels   = value
+			when :mixrampdelay   then @mixer.delay      = value
+			when :bitrate        then @bitrate          = value
+			when :error          then @error            = value
+			when :playlist       then @playlist.version = value
+			when :playlistlength then @playlist.length  = value
+
+			when :song    then (@playlist.current ||= Playlist::Song.new).position = value
+			when :songid  then (@playlist.current ||= Playlist::Song.new).id       = value
+			when :time    then (@playlist.current ||= Playlist::Song.new).elapsed  = value
+			when :elapsed then (@playlist.current ||= Playlist::Song.new).elapsed  = value
+
+			when :nextsong   then (@playlist.next ||= Playlist::Song.new).position = value
+			when :nextsongid then (@playlist.next ||= Playlist::Song.new).id       = value
 			end
 		}
 
-		controller.do(:currentsong).each {|name, value|
-			case name
-			when :file   then song.file        = value
-			when :Pos    then song.position    = value
-			when :Time   then song.duration    = value
-			when :Track  then song.tags.track  = value
-			when :Title  then song.tags.title  = value
-			when :Artist then song.tags.artist = value
-			when :Album  then song.tags.album  = value
-			when :Genre  then song.tags.genre  = value
-			end
-		}
+		@song = Song.from_data(controller.do(:currentsong))
 	end
+
+	def repeat?;  @repeat; end
+	def random?;  @random; end
+	def single?;  @single; end
+	def consume?; @consume; end
 
 	def == (other)
 		super || to_sym.downcase == other.to_sym.downcase

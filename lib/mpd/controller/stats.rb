@@ -13,7 +13,7 @@ module MPD; class Controller
 class Stats
 	Database = Struct.new(:playtime, :update)
 
-	attr_reader :controller, :artists, :songs, :uptime, :playtime, :database
+	attr_reader :controller, :artists, :albums, :uptime, :playtime, :database
 
 	def initialize (controller)
 		@controller = controller
@@ -21,7 +21,7 @@ class Stats
 		response = controller.do(:stats).to_hash
 
 		@artists  = response[:artists]
-		@songs    = response[:songs]
+		@albums   = response[:songs]
 		@uptime   = response[:uptime]
 		@playtime = response[:playtime]
 		@database = Database.new(response[:db_playtime], response[:db_update])

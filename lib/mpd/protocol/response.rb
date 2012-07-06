@@ -33,7 +33,7 @@ class Response
 			when :command, :state, :changed, :replay_gain_mode
 				value.to_sym
 
-			else value
+			else value.force_encoding('UTF-8')
 			end
 		end
 	end

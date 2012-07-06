@@ -12,25 +12,28 @@ require 'socket'
 
 require 'mpd/protocol'
 
-require 'mpd/controller/do'
-require 'mpd/controller/stats'
-require 'mpd/controller/config'
-require 'mpd/controller/supported_tags'
-require 'mpd/controller/supported_protocols'
-require 'mpd/controller/commands'
-require 'mpd/controller/decoders'
-require 'mpd/controller/audio'
-require 'mpd/controller/toggle'
-require 'mpd/controller/player'
-require 'mpd/controller/status'
-require 'mpd/controller/channels'
-
 module MPD
 
 # This is the main class to manage moc.
 #
 # The class also acts as a Socket if needed.
 class Controller
+	autoload :Do, 'mpd/controller/do'
+	autoload :Song, 'mpd/controller/song'
+	autoload :Stats, 'mpd/controller/stats'
+	autoload :Config, 'mpd/controller/config'
+	autoload :SupportedTags, 'mpd/controller/supported_tags'
+	autoload :SupportedProtocols, 'mpd/controller/supported_protocols'
+	autoload :Commands, 'mpd/controller/commands'
+	autoload :Decoders, 'mpd/controller/decoders'
+	autoload :Audio, 'mpd/controller/audio'
+	autoload :Toggle, 'mpd/controller/toggle'
+	autoload :Player, 'mpd/controller/player'
+	autoload :Database, 'mpd/controller/database'
+	autoload :Playlist, 'mpd/controller/playlist'
+	autoload :Status, 'mpd/controller/status'
+	autoload :Channels, 'mpd/controller/channels'
+
 	attr_reader :path, :host, :port, :version
 
 	def initialize (host = 'localhost', port = 6600)
@@ -103,7 +106,7 @@ class Controller
 	end
 
 	def audio
-		@audio ||= Audio.new(self)
+		Audio.new(self)
 	end
 
 	def config
@@ -132,6 +135,10 @@ class Controller
 
 	def player
 		@player ||= Player.new(self)
+	end
+
+	def database
+		@database ||= Database.new(self)
 	end
 
 	def playlist
