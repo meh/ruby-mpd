@@ -44,7 +44,7 @@ class Audio
 		end
 
 		def inspect
-			"#<#{self.class.name}(#{id}, #{enabled? ? 'enabled' : 'disabled'}): #{name} >"
+			"#<#{self.class.name}(#{id}, #{enabled? ? 'enabled' : 'disabled'}): #{name}>"
 		end
 	end
 

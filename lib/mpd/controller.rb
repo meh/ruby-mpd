@@ -14,6 +14,11 @@ require 'mpd/protocol'
 
 require 'mpd/controller/do'
 require 'mpd/controller/stats'
+require 'mpd/controller/config'
+require 'mpd/controller/supported_tags'
+require 'mpd/controller/supported_protocols'
+require 'mpd/controller/commands'
+require 'mpd/controller/decoders'
 require 'mpd/controller/audio'
 require 'mpd/controller/toggle'
 require 'mpd/controller/player'
@@ -79,14 +84,18 @@ class Controller
 		self
 	end
 
-	def kill!
-		self.do :kill
-	end
-
 	def active?
 		self.do(:ping).success?
 	rescue
 		false
+	end
+
+	def kill!
+		self.do :kill
+	end
+
+	def disconnect!
+		self.do :close
 	end
 
 	def stats
@@ -95,6 +104,26 @@ class Controller
 
 	def audio
 		@audio ||= Audio.new(self)
+	end
+
+	def config
+		Config.new(self)
+	end
+
+	def supported_tags
+		SupportedTags.new(self)
+	end
+
+	def supported_protocols
+		SupportedProtocols.new(self)
+	end
+
+	def commands
+		Commands.new(self)
+	end
+
+	def decoders
+		Decoders.new(self)
 	end
 
 	def toggle
