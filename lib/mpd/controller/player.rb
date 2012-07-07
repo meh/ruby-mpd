@@ -19,65 +19,65 @@ class Player
 
 	def play (what = {})
 		if what[:position]
-			controller.do :play, what[:position]
+			controller.do_and_raise_if_needed :play, what[:position]
 		elsif what[:id]
-			controller.do :playid, what[:id]
+			controller.do_and_raise_if_needed :playid, what[:id]
 		else
-			controller.do :play, what.to_sym
+			controller.do_and_raise_if_needed :play, what.to_sym
 		end
 
 		self
 	end
 
 	def pause
-		controller.do :pause, true
+		controller.do_and_raise_if_needed :pause, true
 
 		self
 	end
 
 	def unpause
-		controller.do :pause, false
+		controller.do_and_raise_if_needed :pause, false
 
 		self
 	end
 
 	def stop
-		controller.do :stop
+		controller.do_and_raise_if_needed :stop
 
 		self
 	end
 
 	def next
-		controller.do :next
+		controller.do_and_raise_if_needed :next
 
 		self
 	end
 
 	def prev
-		controller.do :previous
+		controller.do_and_raise_if_needed :previous
 
 		self
 	end
 
 	def volume (volume)
-		controller.do :setvol, volume
+		controller.do_and_raise_if_needed :setvol, volume
 
 		self
 	end
 
 	def crossfade (seconds)
-		controller.do :crossfade, seconds
+		controller.do_and_raise_if_needed :crossfade, seconds
 
 		self
 	end
 
 	def mixer (options)
 		if options[:decibels]
-			controller.do :mixrampdb, options[:decibels]
+			controller.do_and_raise_if_needed :mixrampdb, options[:decibels]
 		end
 
 		if options[:delay]
-			controller.do :mixrampdelay, options[:delay]
+			controller.do_and_raise_if_needed :mixrampdelay, options[:delay]
 		end
 
 		self
@@ -85,21 +85,21 @@ class Player
 
 	def replay_gain (mode = nil)
 		if mode
-			controller.do :replay_gain_mode, mode
+			controller.do_and_raise_if_needed :replay_gain_mode, mode
 
 			self
 		else
-			controller.do(:replay_gain_status).first.last
+			controller.do_and_raise_if_needed(:replay_gain_status).first.last
 		end
 	end
 
 	def seek (second, optional = {})
 		if optional[:position]
-			controller.do :seek, optional[:position], second
+			controller.do_and_raise_if_needed :seek, optional[:position], second
 		elsif optional[:id]
-			controller.do :seekid, optional[:id], second
+			controller.do_and_raise_if_needed :seekid, optional[:id], second
 		else
-			controller.do :seekcur, second
+			controller.do_and_raise_if_needed :seekcur, second
 		end
 
 		self

@@ -23,7 +23,7 @@ class Status
 		@mixer    = Mixer.new
 		@playlist = Playlist.new
 
-		controller.do(:status).each {|name, value|
+		controller.do_and_raise_if_needed(:status).each {|name, value|
 			case name
 			when :state          then @status           = value
 			when :repeat         then @repeat           = value
@@ -49,7 +49,7 @@ class Status
 			end
 		}
 
-		@song = Database::Song.from_data(controller.do(:currentsong))
+		@song = Database::Song.from_data(controller.do_and_raise_if_needed(:currentsong))
 	end
 
 	def repeat?;  @repeat; end

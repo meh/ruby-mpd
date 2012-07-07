@@ -20,18 +20,18 @@ class Stickers
 		end
 
 		def value
-			response    = @element.stickers.controller.do(:sticker, :get, element.type, element.uri, name)
+			response    = @element.stickers.controller.do_and_raise_if_needed(:sticker, :get, element.type, element.uri, name)
 			name, value = response.first.last.split '=', 2
 
 			value
 		end
 
 		def value= (value)
-			@element.stickers.controller.do(:sticker, :set, element.type, element.uri, name, value)
+			@element.stickers.controller.do_and_raise_if_needed(:sticker, :set, element.type, element.uri, name, value)
 		end
 
 		def delete!
-			@element.stickers.controller.do(:sticker, :delete, element.type, element.uri, name)
+			@element.stickers.controller.do_and_raise_if_needed(:sticker, :delete, element.type, element.uri, name)
 		end
 
 		def inspect
@@ -61,7 +61,7 @@ class Stickers
 		def each
 			return to_enum unless block_given?
 
-			@stickers.controller.do(:sticker, :list, type, uri).each {|_, sticker|
+			@stickers.controller.do_and_raise_if_needed(:sticker, :list, type, uri).each {|_, sticker|
 				name, value = sticker.split '=', 2
 
 				yield Sticker.new(self, name)

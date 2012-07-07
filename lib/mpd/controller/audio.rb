@@ -20,25 +20,25 @@ class Audio
 		end
 
 		def name
-			audio.controller.do(:outputs).each_slice(3) {|(_, id), (_, name), (_, enabled)|
+			audio.controller.do_and_raise_if_needed(:outputs).each_slice(3) {|(_, id), (_, name), (_, enabled)|
 				return name if @id == id
 			}
 		end
 
 		def enabled?
-			audio.controller.do(:outputs).each_slice(3) {|(_, id), (_, name), (_, enabled)|
+			audio.controller.do_and_raise_if_needed(:outputs).each_slice(3) {|(_, id), (_, name), (_, enabled)|
 				return enabled if @id == id
 			}
 		end
 
 		def enable!
-			audio.controller.do :enableoutput, id
+			audio.controller.do_and_raise_if_needed :enableoutput, id
 
 			self
 		end
 
 		def disable!
-			audio.controller.do :disableoutput, id
+			audio.controller.do_and_raise_if_needed :disableoutput, id
 
 			self
 		end
@@ -59,7 +59,7 @@ class Audio
 	def each
 		return to_enum unless block_given?
 
-		controller.do(:outputs).each_slice(3) {|(_, id), (_, name), (_, enabled)|
+		controller.do_and_raise_if_needed(:outputs).each_slice(3) {|(_, id), (_, name), (_, enabled)|
 			yield Output.new(self, id)
 		}
 
@@ -67,7 +67,7 @@ class Audio
 	end
 
 	def [] (matches)
-		controller.do(:outputs).each_slice(3) {|(_, id), (_, name), (_, enabled)|
+		controller.do_and_raise_if_needed(:outputs).each_slice(3) {|(_, id), (_, name), (_, enabled)|
 			return Output.new(self, id) if matches == id || matches == name
 		}
 

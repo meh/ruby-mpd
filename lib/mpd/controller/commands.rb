@@ -32,11 +32,11 @@ class Commands
 		@controller = controller
 		@commands   = []
 
-		controller.do(:commands).each {|_, name|
+		controller.do_and_raise_if_needed(:commands).each {|_, name|
 			@commands << Command.new(name)
 		}
 
-		controller.do(:notcommands).each {|_, name|
+		controller.do_and_raise_if_needed(:notcommands).each {|_, name|
 			@commands << Command.new(name, false)
 		}
 	end

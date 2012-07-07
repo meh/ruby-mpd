@@ -31,6 +31,8 @@ class Database
 					end
 				}
 
+				result << Song.from_data(to_read, controller)
+
 				result
 			else
 				song = new(controller)
@@ -59,7 +61,7 @@ class Database
 
 		def self.from_uri (uri, controller = nil)
 			if controller
-				from_data(controller.do(:listallinfo, uri), controller)
+				from_data(controller.do_and_raise_if_needed(:listallinfo, uri), controller)
 			else
 				Song.new.tap {|song|
 					song.file = uri
@@ -111,7 +113,7 @@ class Database
 		def each
 			return enum_for :each unless block_given?
 
-			database.controller.do(:lsinfo, *uri).each {|name, value|
+			database.controller.do_and_raise_if_needed(:lsinfo, *uri).each {|name, value|
 				case name
 				when :file      then yield Song.from_uri(value, database.controller)
 				when :directory then yield Directory.new(database, value)
@@ -187,7 +189,7 @@ class Database
 	def tags (name, artist = nil)
 		return enum_for :tags, name, artist unless block_given?
 
-		controller.do(:list, name, *artist).each {|_, value|
+		controller.do_and_raise_if_needed(:list, name, *artist).each {|_, value|
 			yield value
 		}
 	end
@@ -201,7 +203,7 @@ class Database
 	}
 
 	def search (pattern, options = { tag: :title, strict: false })
-		Song.from_data(controller.do(options[:strict] ? :find : :search, options[:tag], pattern))
+		Song.from_data(controller.do_and_raise_if_needed(options[:strict] ? :find : :search, options[:tag], pattern))
 	end
 
 	def each (&block)
@@ -221,9 +223,9 @@ class Database
 		uri     = args.shift
 
 		if options[:force]
-			controller.do :rescan, *uri
+			controller.do_and_raise_if_needed :rescan, *uri
 		else
-			controller.do :update, *uri
+			controller.do_and_raise_if_needed :update, *uri
 		end
 
 		self

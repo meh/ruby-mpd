@@ -18,12 +18,12 @@ class Toggle
 	end
 
 	def toggle (name)
-		controller.do(name, !on?(name))
+		controller.do_and_raise_if_needed name, !on?(name)
 	end
 
 	def on (name)
 		unless on? name
-			controller.do(name, true)
+			controller.do_and_raise_if_needed name, true
 		end
 
 		self
@@ -31,7 +31,7 @@ class Toggle
 
 	def off (name)
 		if on? name
-			controller.do(name, false)
+			controller.do_and_raise_if_needed name, false
 		end
 
 		self

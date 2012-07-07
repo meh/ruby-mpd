@@ -19,7 +19,7 @@ class SupportedTags
 		@controller = controller
 		@supported  = []
 
-		controller.do(:tagtypes).each {|_, name|
+		controller.do_and_raise_if_needed(:tagtypes).each {|_, name|
 			@supported << name.to_sym
 		}
 	end

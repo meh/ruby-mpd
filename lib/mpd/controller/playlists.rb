@@ -25,7 +25,7 @@ class Playlists
 		def each
 			return to_enum unless block_given?
 
-			Database::Song.from_data(playlists.controller.do(:listplaylistinfo, name)).each {|song|
+			Database::Song.from_data(playlists.controller.do_and_raise_if_needed(:listplaylistinfo, name)).each {|song|
 				yield song
 			}
 
@@ -33,35 +33,35 @@ class Playlists
 		end
 
 		def load (range = nil)
-			raise_if_error playlists.controller.do :load, name, *range
+			playlists.controller.do_and_raise_if_needed :load, name, *range
 
 			self
 		end
 
 		def rename (new)
-			raise_if_error playlists.controller.do :rename, name, new
+			playlists.controller.do_and_raise_if_needed :rename, name, new
 
 			self
 		end
 
 		def delete!
-			raise_if_error playlists.controller.do :rm, name
+			playlists.controller.do_and_raise_if_needed :rm, name
 
 			self
 		end
 
 		def add (uri)
-			raise_if_error playlists.controller.do :playlistadd, name, uri
+			playlists.controller.do_and_raise_if_needed :playlistadd, name, uri
 		end
 
 		def move (from, to)
-			raise_if_error playlists.controller.do :playlistmove, name, from, to
+			playlists.controller.do_and_raise_if_needed :playlistmove, name, from, to
 
 			self
 		end
 
 		def clear
-			raise_if_error playlists.controller.do :playlistclear, name
+			playlists.controller.do_and_raise_if_needed :playlistclear, name
 
 			self
 		end
@@ -83,7 +83,7 @@ class Playlists
 		name          = nil
 		last_modified = nil
 
-		controller.do(:listplaylists).each {|key, value|
+		controller.do_and_raise_if_needed(:listplaylists).each {|key, value|
 			if key == :playlist
 				if last_modified
 					yield Playlist.new(self, name, last_modified)
@@ -95,6 +95,10 @@ class Playlists
 				last_modified = value
 			end
 		}
+
+		if name
+			yield Playlist.new(self, name, last_modified)
+		end
 
 		self
 	end

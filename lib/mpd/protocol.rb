@@ -13,13 +13,3 @@ require 'stringio'
 require 'mpd/protocol/response'
 require 'mpd/protocol/command'
 require 'mpd/protocol/command_list'
-
-module MPD
-	def self.raise_if_error (response)
-		if response.is_a?(Protocol::Error)
-			raise response.message
-		end
-
-		response
-	end
-end

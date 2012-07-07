@@ -20,8 +20,8 @@ class Response
 			@name  = name
 			@value = case name
 			when :song, :artists, :albums, :songs, :uptime, :playtime, :db_playtime, :volume,
-			     :playlist, :playlistlength, :xfade, :Time, :Pos, :Id, :Date, :Track, :Disc,
-			     :MUSICBRAINZ_TRACKID, :outputid
+			     :playlistlength, :xfade, :Time, :Pos, :Id, :Date, :Track, :Disc, :MUSICBRAINZ_TRACKID,
+			     :MUSICBRAINZ_ARTISTID, :MUSICBRAINZ_ALBUMID, :MUSICBRAINZ_ALBUMARTISTID, :outputid
 				value.to_i
 
 			when :mixrampdb, :mixrampdelay

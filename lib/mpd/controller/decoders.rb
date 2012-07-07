@@ -25,7 +25,7 @@ class Decoders
 		suffixes   = nil
 		mime_types = nil
 
-		controller.do(:decoders).each {|type, value|
+		controller.do_and_raise_if_needed(:decoders).each {|type, value|
 			if type == :plugin
 				if name
 					@decoders << Decoder.new(name, suffixes, mime_types)

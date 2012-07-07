@@ -18,7 +18,7 @@ class Stats
 	def initialize (controller)
 		@controller = controller
 
-		response = controller.do(:stats).to_hash
+		response = controller.do_and_raise_if_needed(:stats).to_hash
 
 		@artists  = response[:artists]
 		@songs    = response[:songs]

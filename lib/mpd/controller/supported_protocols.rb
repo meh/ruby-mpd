@@ -19,7 +19,7 @@ class SupportedProtocols
 		@controller = controller
 		@supported  = []
 
-		controller.do(:urlhandlers).each {|_, name|
+		controller.do_and_raise_if_needed(:urlhandlers).each {|_, name|
 			@supported << name[0 .. -4]
 		}
 	end

@@ -16,7 +16,7 @@ class Config < Hash
 	def initialize (controller)
 		@controller = controller
 
-		controller.do(:config).each {|name, value|
+		controller.do_and_raise_if_needed(:config).each {|name, value|
 			self[name] = value
 		}
 

@@ -28,14 +28,14 @@ class CurrentPlaylist
 	end
 
 	def add (uri, position = nil)
-		raise_if_error controller.do(:addid, uri, *position).first.last
+		controller.do_and_raise_if_needed(:addid, uri, *position).first.last
 	end
 
 	def delete (what)
 		if what.is_a?(Integer) || what.is_a?(Range)
-			raise_if_error controller.do :delete, what
+			controller.do_and_raise_if_needed :delete, what
 		else
-			raise_if_error controller.do :deleteid, what
+			controller.do_and_raise_if_needed :deleteid, what
 		end
 
 		self
@@ -43,24 +43,30 @@ class CurrentPlaylist
 
 	def move (from, to)
 		if from.is_a?(Integer) || what.is_a?(Range)
-			raise_if_error controller.do :move, from, to
+			controller.do_and_raise_if_needed :move, from, to
 		else
-			raise_if_error controller.do :moveid, from, to
+			controller.do_and_raise_if_needed :moveid, from, to
 		end
 
 		self
 	end
 
 	def clear
-		raise_if_error controller.do :clear
+		controller.do_and_raise_if_needed :clear
 	end
 
-	def save_as (name)
-		raise_if_error controller.do :save, name
+	def save_as (name, force = false)
+		if force
+			controller.playlists[name].delete!
+		end
+
+		controller.do_and_raise_if_needed :save, name
+
+		self
 	end
 
 	def search (pattern, options = { tag: :title, strict: false })
-		Database::Song.from_data(raise_if_error controller.do(options[:strict] ? :playlistfind : :playlistsearch, options[:tag], pattern))
+		Database::Song.from_data(controller.do_and_raise_if_needed(options[:strict] ? :playlistfind : :playlistsearch, options[:tag], pattern))
 	end
 
 	def each
@@ -74,27 +80,27 @@ class CurrentPlaylist
 	end
 
 	def [] (id)
-		Database::Song.from_data(controller.do(:playlistid, id))
+		Database::Song.from_data(controller.do_and_raise_if_needed(:playlistid, id))
 	end
 
 	def priority (priority, *args)
-		raise_if_error controller.do :prio, priority, *args.select { |o| o.is_a?(Range) }
-		raise_if_error controller.do :prioid, priority, *args.reject { |o| o.is_a?(Range) }
+		controller.do_and_raise_if_needed :prio, priority, *args.select { |o| o.is_a?(Range) }
+		controller.do_and_raise_if_needed :prioid, priority, *args.reject { |o| o.is_a?(Range) }
 
 		self
 	end
 
 	def shuffle (range = nil)
-		raise_if_error controller.do :shuffle, *range
+		controller.do_and_raise_if_needed :shuffle, *range
 
 		self
 	end
 
 	def swap (a, b)
 		if a.is_a?(Integer) && b.is_a?(Integer)
-			raise_if_error controller.do :swap, a, b
+			controller.do_and_raise_if_needed :swap, a, b
 		else
-			raise_if_error controller.do :swapip, a, b
+			controller.do_and_raise_if_needed :swapip, a, b
 		end
 
 		self

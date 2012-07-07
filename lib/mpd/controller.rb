@@ -82,6 +82,16 @@ class Controller
 		end
 	end
 
+	def do_and_raise_if_needed (*args)
+		response = self.do *args
+
+		if response.is_a?(Protocol::Error)
+			raise response.message
+		end
+
+		response
+	end
+
 	def authenticate (password)
 		self.do :password, password
 
