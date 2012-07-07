@@ -55,7 +55,7 @@ class Stickers
 		end
 
 		def delete (name)
-			self[name].delete!
+			self[name].delete! rescue nil
 		end
 
 		def each

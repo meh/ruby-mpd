@@ -79,7 +79,13 @@ class Playlists
 		find { |p| p.name == name.to_s }
 	end
 
+	def delete (name)
+		self[name].delete! rescue nil
+	end
+
 	def each
+		return to_enum unless block_given?
+
 		name          = nil
 		last_modified = nil
 
