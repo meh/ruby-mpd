@@ -10,7 +10,7 @@
 
 module MPD; class Controller
 
-class Playlist
+class CurrentPlaylist
 	include Enumerable
 
 	attr_reader :controller
@@ -28,14 +28,14 @@ class Playlist
 	end
 
 	def add (uri, position = nil)
-		controller.do(:addid, uri, *position).first.last
+		raise_if_error controller.do(:addid, uri, *position).first.last
 	end
 
 	def delete (what)
 		if what.is_a?(Integer) || what.is_a?(Range)
-			controller.do :delete, what
+			raise_if_error controller.do :delete, what
 		else
-			controller.do :deleteid, what
+			raise_if_error controller.do :deleteid, what
 		end
 
 		self
@@ -43,20 +43,24 @@ class Playlist
 
 	def move (from, to)
 		if from.is_a?(Integer) || what.is_a?(Range)
-			controller.do :move, from, to
+			raise_if_error controller.do :move, from, to
 		else
-			controller.do :moveid, from, to
+			raise_if_error controller.do :moveid, from, to
 		end
 
 		self
 	end
 
 	def clear
-		controller.do :clear
+		raise_if_error controller.do :clear
+	end
+
+	def save_as (name)
+		raise_if_error controller.do :save, name
 	end
 
 	def search (pattern, options = { tag: :title, strict: false })
-		Database::Song.from_data(controller.do(options[:strict] ? :playlistfind : :playlistsearch, options[:tag], pattern))
+		Database::Song.from_data(raise_if_error controller.do(options[:strict] ? :playlistfind : :playlistsearch, options[:tag], pattern))
 	end
 
 	def each
@@ -74,23 +78,23 @@ class Playlist
 	end
 
 	def priority (priority, *args)
-		controller.do :prio, priority, *args.select { |o| o.is_a?(Range) }
-		controller.do :prioid, priority, *args.reject { |o| o.is_a?(Range) }
+		raise_if_error controller.do :prio, priority, *args.select { |o| o.is_a?(Range) }
+		raise_if_error controller.do :prioid, priority, *args.reject { |o| o.is_a?(Range) }
 
 		self
 	end
 
 	def shuffle (range = nil)
-		controller.do :shuffle, *range
+		raise_if_error controller.do :shuffle, *range
 
 		self
 	end
 
 	def swap (a, b)
 		if a.is_a?(Integer) && b.is_a?(Integer)
-			controller.do :swap, a, b
+			raise_if_error controller.do :swap, a, b
 		else
-			controller.do :swapip, a, b
+			raise_if_error controller.do :swapip, a, b
 		end
 
 		self

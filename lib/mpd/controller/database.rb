@@ -27,7 +27,7 @@ class Database
 
 						to_read = [[name, value]]
 					else
-						to_read << value
+						to_read << [name, value]
 					end
 				}
 
@@ -76,7 +76,7 @@ class Database
 		end
 
 		def add
-			raise unless controller
+			raise 'no controller, cannot add to playlist' unless controller
 		end
 
 		def respond_to_missing (id, include_private = false)
@@ -89,6 +89,12 @@ class Database
 			end
 
 			super
+		end
+
+		alias uri file
+
+		def inspect
+			"#<#{self.class.name}: #{file.inspect}>"
 		end
 	end
 
@@ -105,7 +111,7 @@ class Database
 		def each
 			return enum_for :each unless block_given?
 
-			controller.do(:lsinfo, *uri).each {|name, value|
+			database.controller.do(:lsinfo, *uri).each {|name, value|
 				case name
 				when :file      then yield Song.from_uri(value, database.controller)
 				when :directory then yield Directory.new(database, value)
@@ -114,34 +120,100 @@ class Database
 
 			self
 		end
+
+		def [] (name)
+			each { |n| return n if n.uri == name }
+
+			nil
+		end
+
+		def inspect
+			"#<#{self.class.name}: #{uri.inspect}>"
+		end
+	end
+
+	class Artist
+		attr_reader :database, :name
+
+		def initialize (database, name)
+			@database = database
+			@name     = name
+		end
+
+		def nil?
+			name.empty?
+		end
+
+		def songs (strict = false)
+			database.search(name, tag: :artist, strict: strict)
+		end
+
+		def inspect
+			"#<#{self.class.name}: #{name.inspect}>"
+		end
+	end
+
+	class Element
+		attr_reader :database, :tag, :name
+
+		def initialize (database, tag, name)
+			@database = database
+			@tag      = tag
+			@name     = name
+		end
+
+		def nil?
+			name.empty?
+		end
+
+		def songs (strict = false)
+			database.search(name, tag: tag, strict: strict)
+		end
+
+		def inspect
+			"#<#{self.class.name.sub(/::Element$/, "::#{tag.capitalize}")}: #{name.inspect}>"
+		end
 	end
 
 	include Enumerable
 
-	attr_reader :controller
+	attr_reader :controller, :root
 
 	def initialize (controller)
 		@controller = controller
+		@root       = Directory.new(self)
 	end
 
-	def search (pattern, options = { tag: :title, strict: false })
-		Song.from_data(controller.do(options[:strict] ? :find : :search, options[:tag], pattern))
-	end
-
-	def tags_for (name, artist = nil)
-		return enum_for :tags_for, name, artist unless block_given?
+	def tags (name, artist = nil)
+		return enum_for :tags, name, artist unless block_given?
 
 		controller.do(:list, name, *artist).each {|_, value|
 			yield value
 		}
 	end
 
-	def each (&block)
-		return enum_for :each, what unless block_given?
+	%w[artists albums genres composers performers].each {|name|
+		tag = name[0 .. -2].to_sym
 
-		Directory.new(self).each(&block)
+		define_method name do |artist = nil|
+			tags(tag, artist).map { |n| Element.new(self, tag, n) }
+		end
+	}
+
+	def search (pattern, options = { tag: :title, strict: false })
+		Song.from_data(controller.do(options[:strict] ? :find : :search, options[:tag], pattern))
+	end
+
+	def each (&block)
+		return to_enum unless block_given?
+
+		@root.each(&block)
 
 		self
+	end
+
+	def [] (name)
+		@root[name]
 	end
 
 	def update (*args)

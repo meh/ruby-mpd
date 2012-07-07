@@ -29,9 +29,11 @@ class Controller
 	autoload :Audio, 'mpd/controller/audio'
 	autoload :Toggle, 'mpd/controller/toggle'
 	autoload :Player, 'mpd/controller/player'
-	autoload :Playlist, 'mpd/controller/playlist'
+	autoload :CurrentPlaylist, 'mpd/controller/current_playlist'
+	autoload :Playlists, 'mpd/controller/playlists.rb'
 	autoload :Status, 'mpd/controller/status'
 	autoload :Channels, 'mpd/controller/channels'
+	autoload :Stickers, 'mpd/controller/stickers'
 
 	attr_reader :path, :host, :port, :version
 
@@ -140,8 +142,16 @@ class Controller
 		@player ||= Player.new(self)
 	end
 
-	def playlist
-		@playlist ||= Playlist.new(self)
+	def playlists
+		@playlists ||= Playlists.new(self)
+	end
+
+	def playlist (name = nil)
+		if name
+			playlists[name]
+		else
+			@playlist ||= CurrentPlaylist.new(self)
+		end
 	end
 
 	def status
@@ -150,6 +160,10 @@ class Controller
 
 	def channels
 		@channels ||= Channels.new(self)
+	end
+
+	def stickers
+		@stickers ||= Stickers.new(self)
 	end
 
 	def channel (name)
@@ -170,6 +184,12 @@ class Controller
 
 	def stop_waiting
 		self.do :noidle
+	end
+
+	def loop (*what)
+		loop do
+			yield wait_for *what
+		end
 	end
 end
 

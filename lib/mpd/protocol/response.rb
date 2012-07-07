@@ -8,6 +8,8 @@
 #  0. You just DO WHAT THE FUCK YOU WANT TO.
 #++
 
+require 'date'
+
 module MPD; module Protocol
 
 class Response
@@ -33,6 +35,9 @@ class Response
 
 			when :command, :state, :changed, :replay_gain_mode
 				value.to_sym
+
+			when :"Last-Modified"
+				DateTime.iso8601(value)
 
 			else value.force_encoding('UTF-8')
 			end
