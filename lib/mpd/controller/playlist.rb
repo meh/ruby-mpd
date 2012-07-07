@@ -55,14 +55,18 @@ class Playlist
 		controller.do :clear
 	end
 
-	def select (pattern, options = { tag: :title, strict: false })
+	def search (pattern, options = { tag: :title, strict: false })
 		Database::Song.from_data(controller.do(options[:strict] ? :playlistfind : :playlistsearch, options[:tag], pattern))
 	end
 
 	def each
+		return to_enum unless block_given?
+
 		Database::Song.from_data(controller.do(:playlistinfo)).each {|song|
 			yield song
 		}
+
+		self
 	end
 
 	def [] (id)

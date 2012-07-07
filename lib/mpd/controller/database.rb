@@ -57,10 +57,20 @@ class Database
 			end
 		end
 
+		def self.from_uri (uri, controller = nil)
+			if controller
+				from_data(controller.do(:listallinfo, uri), controller)
+			else
+				Song.new.tap {|song|
+					song.file = uri
+				}
+			end
+		end
+
 		attr_reader   :controller, :tags
 		attr_accessor :file, :position, :duration
 
-		def initialize (controller)
+		def initialize (controller = nil)
 			@controller = controller
 			@tags       = Tags.new
 		end
@@ -85,10 +95,24 @@ class Database
 	class Directory
 		include Enumerable
 
-		attr_reader :database
+		attr_reader :database, :uri
 
-		def initialize (database)
+		def initialize (database, uri = nil)
 			@database = database
+			@uri      = uri
+		end
+
+		def each
+			return enum_for :each unless block_given?
+
+			controller.do(:lsinfo, *uri).each {|name, value|
+				case name
+				when :file      then yield Song.from_uri(value, database.controller)
+				when :directory then yield Directory.new(database, value)
+				end
+			}
+
+			self
 		end
 	end
 
@@ -100,12 +124,24 @@ class Database
 		@controller = controller
 	end
 
-	def select (pattern, options = { tag: :title, strict: false })
+	def search (pattern, options = { tag: :title, strict: false })
 		Song.from_data(controller.do(options[:strict] ? :find : :search, options[:tag], pattern))
 	end
 
-	def each
+	def tags_for (name, artist = nil)
+		return enum_for :tags_for, name, artist unless block_given?
 
+		controller.do(:list, name, *artist).each {|_, value|
+			yield value
+		}
+	end
+
+	def each (&block)
+		return enum_for :each, what unless block_given?
+
+		Directory.new(self).each(&block)
+
+		self
 	end
 
 	def update (*args)

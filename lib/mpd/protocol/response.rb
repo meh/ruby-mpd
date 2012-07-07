@@ -73,6 +73,8 @@ class Response
 	end
 
 	def each
+		return to_enum unless block_given?
+
 		@internal.each {|data|
 			yield [data.name, data.value]
 		}

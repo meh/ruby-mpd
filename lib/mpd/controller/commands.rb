@@ -42,7 +42,11 @@ class Commands
 	end
 
 	def each (&block)
+		return to_enum unless block_given?
+
 		@commands.each(&block)
+
+		self
 	end
 
 	def inspect

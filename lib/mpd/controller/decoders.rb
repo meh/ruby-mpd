@@ -43,7 +43,11 @@ class Decoders
 	end
 
 	def each (&block)
+		return to_enum unless block_given?
+
 		@decoders.each(&block)
+
+		self
 	end
 end
 

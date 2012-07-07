@@ -59,9 +59,13 @@ class Channels
 	end
 
 	def each
+		return to_enum unless block_given?
+
 		each_name {|name|
 			yield self[name]
 		}
+
+		self
 	end
 
 	def [] (name, sub = true)

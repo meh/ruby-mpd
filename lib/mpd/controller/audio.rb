@@ -57,9 +57,13 @@ class Audio
 	end
 
 	def each
+		return to_enum unless block_given?
+
 		controller.do(:outputs).each_slice(3) {|(_, id), (_, name), (_, enabled)|
 			yield Output.new(self, id)
 		}
+
+		self
 	end
 
 	def [] (matches)

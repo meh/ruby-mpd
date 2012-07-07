@@ -25,7 +25,11 @@ class SupportedTags
 	end
 
 	def each (&block)
+		return to_enum unless block_given?
+
 		@supported.each(&block)
+
+		self
 	end
 end
 
