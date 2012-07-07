@@ -56,17 +56,17 @@ class Playlist
 	end
 
 	def select (pattern, options = { tag: :title, strict: false })
-		Song.from_data(controller.do(options[:strict] ? :playlistfind : :playlistsearch, options[:tag], pattern))
+		Database::Song.from_data(controller.do(options[:strict] ? :playlistfind : :playlistsearch, options[:tag], pattern))
 	end
 
 	def each
-		Song.from_data(controller.do(:playlistinfo)).each {|song|
+		Database::Song.from_data(controller.do(:playlistinfo)).each {|song|
 			yield song
 		}
 	end
 
 	def [] (id)
-		Song.from_data(controller.do(:playlistid, id))
+		Database::Song.from_data(controller.do(:playlistid, id))
 	end
 
 	def priority (priority, *args)

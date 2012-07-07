@@ -49,7 +49,7 @@ class Status
 			end
 		}
 
-		@song = Song.from_data(controller.do(:currentsong))
+		@song = Database::Song.from_data(controller.do(:currentsong))
 	end
 
 	def repeat?;  @repeat; end

@@ -19,7 +19,7 @@ module MPD
 # The class also acts as a Socket if needed.
 class Controller
 	autoload :Do, 'mpd/controller/do'
-	autoload :Song, 'mpd/controller/song'
+	autoload :Database, 'mpd/controller/database'
 	autoload :Stats, 'mpd/controller/stats'
 	autoload :Config, 'mpd/controller/config'
 	autoload :SupportedTags, 'mpd/controller/supported_tags'
@@ -29,7 +29,6 @@ class Controller
 	autoload :Audio, 'mpd/controller/audio'
 	autoload :Toggle, 'mpd/controller/toggle'
 	autoload :Player, 'mpd/controller/player'
-	autoload :Database, 'mpd/controller/database'
 	autoload :Playlist, 'mpd/controller/playlist'
 	autoload :Status, 'mpd/controller/status'
 	autoload :Channels, 'mpd/controller/channels'
@@ -101,6 +100,10 @@ class Controller
 		self.do :close
 	end
 
+	def database
+		@database ||= Database.new(self)
+	end
+
 	def stats
 		Stats.new(self)
 	end
@@ -135,10 +138,6 @@ class Controller
 
 	def player
 		@player ||= Player.new(self)
-	end
-
-	def database
-		@database ||= Database.new(self)
 	end
 
 	def playlist
