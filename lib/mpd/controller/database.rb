@@ -40,7 +40,6 @@ class Database
 				data.each {|name, value|
 					case name
 					when :file                then song.file           = value
-					when :Pos                 then song.position       = value
 					when :Time                then song.duration       = value
 					when :Track               then song.tags.track     = value
 					when :Title               then song.tags.title     = value
