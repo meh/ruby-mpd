@@ -100,7 +100,7 @@ class Controller
 
 	def active?
 		self.do(:ping).success?
-	rescue
+	rescue Exception
 		false
 	end
 
@@ -198,7 +198,9 @@ class Controller
 
 	def loop (*what)
 		while true
-			yield wait_for *what
+			(what.empty? ? wait : wait_for(*what)).each {|name|
+				yield name
+			}
 		end
 	end
 end
