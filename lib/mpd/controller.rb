@@ -197,7 +197,7 @@ class Controller
 	end
 
 	def loop (*what)
-		loop do
+		while true
 			yield wait_for *what
 		end
 	end
