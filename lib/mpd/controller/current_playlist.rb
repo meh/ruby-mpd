@@ -47,6 +47,8 @@ class CurrentPlaylist
 
 		def swap (other)
 			controller.do_and_raise_if_needed :swapip, id, b
+
+			other
 		end
 	end
 
