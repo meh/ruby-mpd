@@ -49,8 +49,11 @@ class Status
 			end
 		}
 
-		@song          = Database::Song.from_data(controller.do_and_raise_if_needed(:currentsong))
-		@song.position = playlist.current.elapsed
+		@song = Database::Song.from_data(controller.do_and_raise_if_needed(:currentsong))
+
+		if playlist.current
+			@song.position = playlist.current.elapsed
+		end
 	end
 
 	def repeat?;  @repeat; end

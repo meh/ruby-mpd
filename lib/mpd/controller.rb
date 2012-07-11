@@ -182,13 +182,13 @@ class Controller
 
 	def wait
 		self.do(:idle).map(&:last)
-	rescue Interrupt
+	rescue Exception
 		stop_waiting and raise # my undead army
 	end
 
 	def wait_for (*args)
 		self.do(:idle, *args.flatten.compact.uniq).map(&:last)
-	rescue Interrupt
+	rescue Exception
 		stop_waiting and raise # my undead army
 	end
 

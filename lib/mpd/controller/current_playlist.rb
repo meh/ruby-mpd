@@ -11,6 +11,45 @@
 module MPD; class Controller
 
 class CurrentPlaylist
+	class Song < Database::Song
+		attr_reader :playlist, :id
+
+		def initialize (playlist, id)
+			super(playlist.controller)
+
+			@playlist = playlist
+			@id       = id
+
+			Database::Song.from_data(playlist.controller.do_and_raise_if_needed(:playlistid, id)).tap {|song|
+				@tags     = song.tags
+				@file     = song.file
+				@duration = song.duration
+			}
+		end
+
+		def delete!
+			controller.do_and_raise_if_needed :deleteid, id
+		end
+
+		def move (to)
+			controller.do_and_raise_if_needed :moveid, id, to
+
+			true
+		rescue
+			false
+		end
+
+		def priority (value)
+			controller.do_and_raise_if_needed :prioid, value, id
+
+			self
+		end
+
+		def swap (other)
+			controller.do_and_raise_if_needed :swapip, id, b
+		end
+	end
+
 	include Enumerable
 
 	attr_reader :controller
@@ -28,25 +67,17 @@ class CurrentPlaylist
 	end
 
 	def add (uri, position = nil)
-		controller.do_and_raise_if_needed(:addid, uri, *position).first.last
+		Song.new(self, controller.do_and_raise_if_needed(:addid, uri, *position).to_hash[:Id])
 	end
 
 	def delete (what)
-		if what.is_a?(Integer) || what.is_a?(Range)
-			controller.do_and_raise_if_needed :delete, what
-		else
-			controller.do_and_raise_if_needed :deleteid, what
-		end
+		controller.do_and_raise_if_needed :delete, what
 
 		self
 	end
 
 	def move (from, to)
-		if from.is_a?(Integer) || what.is_a?(Range)
-			controller.do_and_raise_if_needed :move, from, to
-		else
-			controller.do_and_raise_if_needed :moveid, from, to
-		end
+		controller.do_and_raise_if_needed :move, from, to
 
 		self
 	end
@@ -72,20 +103,19 @@ class CurrentPlaylist
 	def each
 		return to_enum unless block_given?
 
-		Database::Song.from_data(controller.do(:playlistinfo)).each {|song|
-			yield song
+		controller.do(:playlistid).select { |name, value| a == :Id }.each {|name, value|
+			yield Song.new(self, value)
 		}
 
 		self
 	end
 
 	def [] (id)
-		Database::Song.from_data(controller.do_and_raise_if_needed(:playlistid, id))
+		Song.new(self, id)
 	end
 
 	def priority (priority, *args)
-		controller.do_and_raise_if_needed :prio, priority, *args.select { |o| o.is_a?(Range) }
-		controller.do_and_raise_if_needed :prioid, priority, *args.reject { |o| o.is_a?(Range) }
+		controller.do_and_raise_if_needed :prio, priority, *args
 
 		self
 	end
@@ -97,11 +127,7 @@ class CurrentPlaylist
 	end
 
 	def swap (a, b)
-		if a.is_a?(Integer) && b.is_a?(Integer)
-			controller.do_and_raise_if_needed :swap, a, b
-		else
-			controller.do_and_raise_if_needed :swapip, a, b
-		end
+		controller.do_and_raise_if_needed :swap, a, b
 
 		self
 	end
