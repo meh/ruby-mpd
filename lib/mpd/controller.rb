@@ -93,23 +93,23 @@ class Controller
 	end
 
 	def authenticate (password)
-		self.do :password, password
+		do_and_raise_if_needed :password, password
 
 		self
 	end
 
 	def active?
-		self.do(:ping).success?
+		do_and_raise_if_needed :ping
 	rescue Exception
 		false
 	end
 
 	def kill!
-		self.do :kill
+		do_and_raise_if_needed :kill
 	end
 
 	def disconnect!
-		self.do :close
+		do_and_raise_if_needed :close
 	end
 
 	def database
@@ -180,31 +180,51 @@ class Controller
 		channels[name]
 	end
 
-	def idle?; !!@idle; end
+	def waiting?; !!@waiting; end
 
 	def wait (*args)
-		@idle  = true
-		active = self.do(:idle, *args.flatten.compact.uniq).map(&:last)
+		raise 'the controller is already waiting' if waiting?
+
+		@waiting = true
+		active   = do_and_raise_if_needed(:idle, *args.flatten.compact.uniq).map(&:last)
 
 		active.empty? ? nil : active
 	rescue Exception
 		stop_waiting and raise # my undead army
 	ensure
-		@idle = false
+		@waiting = false
 	end
 
 	alias wait_for wait
 
 	def stop_waiting
-		self.do(:noidle) if idle?
+		@socket.puts 'noidle' if waiting?
 	end
 
+	def looping?; !!@looping; end
+
 	def loop (*what)
+		return if looping?
+
+		@looping = true
+
 		while true
-			(wait_for(*what) || [:break]).each {|name|
-				yield name
-			}
+			if active = wait_for(*what)
+				active.each { |n| yield n }
+			else
+				return unless looping?
+
+				yield :break
+			end
 		end
+	ensure
+		@looping = false
+	end
+
+	def stop_looping
+		@looping = false
+
+		stop_waiting
 	end
 end
 
