@@ -197,7 +197,7 @@ class Controller
 
 	alias wait_for wait
 
-	def stop_waiting
+	def stop_waiting!
 		@socket.puts 'noidle' if waiting?
 	end
 
@@ -221,7 +221,7 @@ class Controller
 		@looping = false
 	end
 
-	def stop_looping
+	def stop_looping!
 		@looping = false
 
 		stop_waiting
