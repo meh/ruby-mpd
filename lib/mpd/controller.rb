@@ -180,25 +180,28 @@ class Controller
 		channels[name]
 	end
 
-	def wait
-		self.do(:idle).map(&:last)
+	def idle?; !!@idle; end
+
+	def wait (*args)
+		@idle  = true
+		active = self.do(:idle, *args.flatten.compact.uniq).map(&:last)
+
+		active.empty? ? nil : active
 	rescue Exception
 		stop_waiting and raise # my undead army
+	ensure
+		@idle = false
 	end
 
-	def wait_for (*args)
-		self.do(:idle, *args.flatten.compact.uniq).map(&:last)
-	rescue Exception
-		stop_waiting and raise # my undead army
-	end
+	alias wait_for wait
 
 	def stop_waiting
-		self.do :noidle
+		self.do(:noidle) if idle?
 	end
 
 	def loop (*what)
 		while true
-			(what.empty? ? wait : wait_for(*what)).each {|name|
+			(wait_for(*what) || [:break]).each {|name|
 				yield name
 			}
 		end
