@@ -36,8 +36,7 @@ class CommandList
 		}
 		result.print 'command_list_end'
 
-		result.seek 0
-		result.read
+		result.string
 	end
 
 	def to_a
