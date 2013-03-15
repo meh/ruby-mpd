@@ -112,6 +112,12 @@ class CurrentPlaylist
 		self
 	end
 
+  def songs
+    controller.do(:playlistid).select { |name, value| name == :Id }.collect{ |k, v|
+      Song.new(self, v)
+    }
+  end
+
 	def [] (id)
 		Song.new(self, id)
 	end
