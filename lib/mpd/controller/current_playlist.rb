@@ -105,7 +105,7 @@ class CurrentPlaylist
 	def each
 		return to_enum unless block_given?
 
-		controller.do(:playlistid).select { |name, value| a == :Id }.each {|name, value|
+		controller.do(:playlistid).select { |name, value| name == :Id }.each {|name, value|
 			yield Song.new(self, value)
 		}
 
